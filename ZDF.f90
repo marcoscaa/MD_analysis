@@ -1,6 +1,6 @@
 MODULE parameters
   IMPLICIT NONE 
-  INTEGER, PARAMETER                   :: nbins = 400
+  INTEGER, PARAMETER                   :: nbins = 350
   REAL*8, DIMENSION(:,:), ALLOCATABLE  :: pos
   REAL*8, DIMENSION(9)                 :: box
   INTEGER, DIMENSION(nbins)            :: hist
@@ -72,7 +72,7 @@ SUBROUTINE INITIALIZE
   !Restart file reading from first line
   CLOSE(1)
 
-  OPEN(unit  =  1,file  =  "ana.traj.xyz")
+  OPEN(unit  =  1,file  =  file_name)
 
   hist = 0
 
