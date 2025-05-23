@@ -1,0 +1,14 @@
+Run the code as
+make 
+./dtc.x dipole.lammpstrj index_dac
+
+The file index_dac is a single line file containing:
+
+natoms ndipole nframes nequil dt tcorr
+
+natoms: total number of atoms in the lammpstrj file
+ndipole: total number of dipole centers
+nframes: total number of frames in the lammpstrj file
+nequil: number of initial snapshots to be discarded
+dt: timestep in ps (difference in time between consecutive snapshots in the lammpstrj file)
+tcorr: total number of time (in dt units) to be considered in the time correlation function (2 ps should be enough)
