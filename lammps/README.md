@@ -4,7 +4,7 @@ To compile the codes, first
 
 ```
 cd src
-make
+make gnu
 cd ..
 ```
 
