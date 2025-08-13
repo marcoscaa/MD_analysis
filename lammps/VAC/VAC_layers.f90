@@ -235,22 +235,3 @@ SUBROUTINE COARSE_GRAIN_HYDROGEN (frame)
 
 END SUBROUTINE COARSE_GRAIN_HYDROGEN
 
-SUBROUTINE TEST_POS
-  USE parameters, ONLY : pos, atype, natoms, box
-  IMPLICIT NONE
-  REAL*8 :: z
-  INTEGER :: iat
-
-  DO iat = 1,natoms
-
-    if (atype(iat)==1) THEN
-      
-      z = pos(3,iat) - box(3)/6.
-      z = z - nint(z/box(3))* box(3)
-      print *, z
-
-    end if
-
-  END DO
-
-END SUBROUTINE TEST_POS
