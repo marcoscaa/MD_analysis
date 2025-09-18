@@ -10,16 +10,22 @@ END MODULE histogram
 
 PROGRAM angle_dist 
   USE parameters, ONLY : nframes
+  USE, intrinsic :: iso_fortran_env, Only : iostat_end
   IMPLICIT NONE
-  INTEGER :: frame
+  INTEGER :: frame, iostat
 
   CALL INITIALIZE
   CALL REMOVE_EQUIL
   
-  DO frame = 1,nframes
-    CALL READ_ATOM_REDUCED
+  frame=1
+  DO 
+    CALL READ_EXTXYZ_IO (iostat)
+    IF (iostat == iostat_end ) THEN
+      EXIT
+    END IF
     CALL FIND_WATER_ION
     CALL MAKE_HISTOGRAM
+    frame=frame+1
   END DO
 
   CALL PRINT_RESULTS
@@ -29,21 +35,15 @@ PROGRAM angle_dist
 END PROGRAM angle_dist
 
 SUBROUTINE INITIALIZE
-  USE parameters, only : natoms,nframes,nequil,nhist, pos, atype, &
-                         atypeO, atypeH
+  USE parameters, only : natoms,nframes,nequil,nhist, pos, atype
   USE histogram
   IMPLICIT NONE
-  CHARACTER(100)             :: pos_file, index_file
+  CHARACTER(100)             :: pos_file
 
   !User should provide filename and index_file as arguments 
   CALL getarg(1, pos_file)
-  CALL getarg(2, index_file)
-
-  !Read the index file
-  OPEN(unit=1, file = index_file)
-  READ(1,*) natoms, nframes, nequil, nhist
-  READ(1,*) atypeO, atypeH,  d_cut !User defined distance cutoff for bonds
-  CLOSE(1)
+  PRINT*, "Give the O-O cutoff radius (in A units):"
+  READ *, d_cut
 
   !Allocate module arrays
   ALLOCATE(pos(3,natoms))
@@ -100,7 +100,7 @@ END SUBROUTINE
 
 SUBROUTINE CONNECT_NEAREST_NEIGHBOHRS( iat,bonds,nbonds )
   !Compute the coordination number of atom with index iat
-  USE parameters, ONLY : natoms, atype, atypeO
+  USE parameters, ONLY : natoms, atype
   USE histogram, ONLY : d_cut, maxcoord
   IMPLICIT NONE
   INTEGER, INTENT(IN)        :: iat 
@@ -111,7 +111,7 @@ SUBROUTINE CONNECT_NEAREST_NEIGHBOHRS( iat,bonds,nbonds )
   bonds=0
 
   DO iat2 = 1, natoms
-    IF ( (iat2.ne.iat).and.(atype(iat2).eq.atypeO) ) THEN
+    IF ( (iat2.ne.iat).and.(trim(atype(iat2)).eq."O") ) THEN
       CALL DIST_UNIT_VECTOR(iat,iat2,d,normd) 
       IF ( normd < d_cut ) THEN 
         nbonds = nbonds + 1
@@ -123,7 +123,7 @@ SUBROUTINE CONNECT_NEAREST_NEIGHBOHRS( iat,bonds,nbonds )
 END SUBROUTINE CONNECT_NEAREST_NEIGHBOHRS
 
 SUBROUTINE FIND_WATER_ION
-  USE parameters, ONLY : atype, natoms, atypeO, atypeH
+  USE parameters, ONLY : atype, natoms
   USE histogram, ONLY : is_water_ion
   IMPLICIT NONE
   INTEGER :: iat, cn_ow(natoms), ind_Ow(natoms)
@@ -133,14 +133,14 @@ SUBROUTINE FIND_WATER_ION
   ind_Ow=0
   is_water_ion=.false.
   DO iat=1,natoms
-    if (atype(iat)==atypeH) then !2: H index
-      ind_Ow(iat) = closest_atom(iat,atypeO)
+    if (trim(atype(iat))=="H") then 
+      ind_Ow(iat) = closest_atom(iat,"O    ")
       cn_ow(ind_Ow(iat)) = cn_ow(ind_Ow(iat)) + 1
     END IF
   END DO
       
   DO iat=1,natoms
-    if (atype(iat)==atypeO) then !1: O index
+    if (trim(atype(iat))=="O") then !1: O index
       if(cn_Ow(iat)/=2) then
         is_water_ion(iat)=.True.
       end if
@@ -152,7 +152,8 @@ END SUBROUTINE FIND_WATER_ION
 INTEGER FUNCTION closest_atom(icenter,atyp)
   USE parameters, ONLY : natoms, atype
   IMPLICIT NONE
-  INTEGER, INTENT(IN) :: icenter, atyp
+  INTEGER, INTENT(IN) :: icenter
+  CHARACTER(5), INTENT(IN) :: atyp
   INTEGER :: iat, iat_min
   REAL*8 :: d, min_d, Dist
 
@@ -161,7 +162,7 @@ INTEGER FUNCTION closest_atom(icenter,atyp)
 
   DO iat=1,natoms
 
-    IF (atype(iat)==atyp) THEN
+    IF (trim(atype(iat))==trim(atyp)) THEN
       d = Dist(iat,icenter)
       IF (d < min_d) THEN
         min_d=d
