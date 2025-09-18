@@ -44,6 +44,7 @@ SUBROUTINE INITIALIZE
   CALL getarg(1, pos_file)
   PRINT*, "Give the O-O cutoff radius (in A units):"
   READ *, d_cut
+  nhist=1000 !HARDCODED
 
   !Allocate module arrays
   ALLOCATE(pos(3,natoms))
