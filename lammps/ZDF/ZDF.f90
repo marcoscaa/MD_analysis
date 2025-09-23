@@ -8,25 +8,19 @@ MODULE histogram
   INTEGER                                  :: nhist
   INTEGER, ALLOCATABLE                     :: hist(:,:)
   INTEGER                                  :: ntype, zdir
-  LOGICAL                                  :: input_is_xyz=.false.
   REAL*8                                   :: zoffset
 END MODULE histogram 
 
 PROGRAM ZDF
   USE parameters
-  USE histogram, only: input_is_xyz
   IMPLICIT NONE
   INTEGER                              :: frame
 
   CALL INITIALIZE
-  CALL REMOVE_EQUIL(input_is_xyz)
+  CALL REMOVE_EQUIL
   
   DO frame = 1,nframes
-    if (input_is_xyz) then
-      CALL READ_XYZ
-    else
       CALL READ_ATOM_REDUCED
-    end if
     IF (MOD(frame,nskip)==0) THEN
       !CALL SET_CENTER_OF_MASS_TO_ZERO
       CALL MAKE_HISTOGRAM
@@ -55,18 +49,9 @@ SUBROUTINE INITIALIZE
   READ(1,*) natoms, ntype, nframes, nequil, nskip, nhist, zdir
   READ(1,*) zoffset
 
-
   ALLOCATE(pos(3,natoms))
   ALLOCATE(atype(natoms))
   ALLOCATE(hist(ntype,nhist)); hist=0
-
-  !Read the index file
-  IF (input_is_xyz) THEN
-    READ(1,*) box 
-    DO i = 1,natoms
-      READ(1,fmt = "(I2)") atype(i)  
-    END DO
-  END IF
 
   CLOSE(1)
   OPEN(unit  =  1,file  =  pos_file)
