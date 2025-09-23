@@ -27,6 +27,7 @@ layers="0 1" #Specify the boundaries of layers along z (angstrom)
 nat=`head $pos | awk '(NR==4){print $1}'`
 nframes=`grep TIMESTEP $pos | wc -l | awk '{print $1}'`
 nattype=`tail -n $nat $pos | awk -v"a=$atypemsd" 'BEGIN{c=0} ($2==a){c+=1} END{print c}'`
+ntype=`tail -n $nat $pos | awk '{print $2}' | sort | tail -n 1`
 a=`tail -n $((nat+9)) $pos | head -n 10 | awk '(NR==6){print $2-$1}'`
 b=`tail -n $((nat+9)) $pos | head -n 10 | awk '(NR==7){print $2-$1}'`
 c=`tail -n $((nat+9)) $pos | head -n 10 | awk '(NR==8){print $2-$1}'`
@@ -63,7 +64,7 @@ $nat $nframes $nequil $stride $nhistlsi
 EOF
 
 cat << EOF > index_zdf
-$nat $nattype $nframes $nequil $stride $nhistzdf 3
+$nat $ntype $nframes $nequil $stride $nhistzdf 3
 $zoffset
 EOF
 
