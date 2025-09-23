@@ -5,7 +5,7 @@ MODULE parameters
   INTEGER                            :: nframes, nequil, nhist, nwann
   INTEGER                            :: nlayers, nskip, stride
   INTEGER                            :: maxneighbor, nTi5c, natoms_buff
-  INTEGER                            :: atypeO,atypeH, indexC, zoffset
+  INTEGER                            :: atypeO,atypeH, indexC
   INTEGER, ALLOCATABLE               :: moltype(:), atype(:), atype_wann(:) 
   INTEGER, ALLOCATABLE               :: gofr(:) 
   INTEGER, ALLOCATABLE               :: coarse(:,:) 
@@ -14,7 +14,7 @@ MODULE parameters
   INTEGER, ALLOCATABLE               :: neighborlist(:,:)
   INTEGER, ALLOCATABLE               :: index_O2c(:)
   INTEGER, ALLOCATABLE               :: molid(:), index_bonded(:,:)
-  REAL*8                             :: box(3)
+  REAL*8                             :: box(3), zoffset
   REAL*8, ALLOCATABLE                :: pos(:,:), vel(:,:), wannier(:,:)
   REAL*8, ALLOCATABLE                :: layers(:) 
   REAL*8,ALLOCATABLE                 :: rcut(:,:)
