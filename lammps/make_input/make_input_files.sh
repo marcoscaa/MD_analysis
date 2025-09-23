@@ -5,6 +5,8 @@ atype1=2     #Atom type used for angle distribution
 atype2=2     #Atom type used for angle distribution
 ntype1=2     # Number of atoms of type 1
 ntype2=2     # Number of atoms of type 2
+atypeO=2     # Index type of O atoms
+atypeH=3     # Index type of H atoms
 atypemsd=2   #Atom type used to compute MSD
 nequil=0     #Number of initial steps not included for analysis
 rcut="3.3"   #Radius cutoff to define 1st nearest neighbors for angle distribution
@@ -56,7 +58,7 @@ EOF
 
 cat << EOF > index_orient
 $nat $nframes $nequil $stride $nhistang $rmax
-$center
+$center $atypeO $atypeH
 EOF
 
 cat << EOF > index_order
