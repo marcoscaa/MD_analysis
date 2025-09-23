@@ -34,7 +34,7 @@ PROGRAM ZDF
 END PROGRAM ZDF
 
 SUBROUTINE INITIALIZE
-  USE histogram, ONLY  : hist, ntype, nhist, input_is_xyz, zdir, zoffset
+  USE histogram, ONLY  : hist, ntype, nhist, zdir, zoffset
   USE parameters, ONLY : natoms, nframes, nequil, box,&
                          atype, pos, nskip
   IMPLICIT NONE
