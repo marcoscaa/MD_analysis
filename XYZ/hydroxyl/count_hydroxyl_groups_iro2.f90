@@ -90,7 +90,7 @@ SUBROUTINE Find_O2c (coord_file)
     !Find 2 coordinated O atoms
     IF ( TRIM(atype(iat)) == "O" ) THEN
       !
-      IF (CordNumb(iat,"Ir   ",cutoff_TiO)==2) THEN
+      IF (CordNumb(iat,"Ru   ",cutoff_TiO)==2) THEN
         !
         iO=iO+1
         bufferO2c(iO)=iat

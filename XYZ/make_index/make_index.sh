@@ -14,6 +14,7 @@ $nat $nframes $nequil $stride $nbins 3
 0.0 
 EOF
 
+  echo "${nat} ${nframes} ${nequil}" > index_oh
   #echo "${nat} ${nattype} ${nframes} 0 0.10 1 10000" > index_msd
   #echo "${nat} ${nframes} ${nequil} ${stride}" > index_hb
 
