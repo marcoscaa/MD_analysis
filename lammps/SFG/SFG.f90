@@ -17,7 +17,8 @@ PROGRAM SFG
   CALL REMOVE_EQUIL
 
   DO frame = 1,nframes
-    CALL READ_CUSTOM_POS_VEL
+    CALL READ_ATOM_REDUCED
+    CALL READ_VELOCITIES
     CALL SET_CENTER_OF_MASS_TO_ZERO
     CALL OH_DISTRIBUTION (frame)
   END DO
@@ -52,8 +53,8 @@ SUBROUTINE INITIALIZE
   READ(1,*) layers
   CLOSE(1)
 
-  ALLOCATE(pos(natoms,3)) ! coordinates
-  ALLOCATE(vel(natoms,3)) ! velocities 
+  ALLOCATE(pos(3,natoms)) ! coordinates
+  ALLOCATE(vel(3,natoms)) ! velocities 
   ALLOCATE(coarse(nframes,2*nwater)); coarse=0
   ALLOCATE(oh_dist(3,2*nwater,nframes)); oh_dist = 0.d0
   ALLOCATE(oh_vel(3,2*nwater,nframes)); oh_vel = 0.d0
