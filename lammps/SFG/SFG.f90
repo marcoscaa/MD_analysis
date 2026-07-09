@@ -35,8 +35,8 @@ SUBROUTINE INITIALIZE
   USE histogram,  ONLY : autocorr, oh_dist, oh_vel
   USE parameters, ONLY : natoms, nframes, nwater, &
                          pos, vel, coarse, nlayers, &
-                         nequil,  nwater, dt, layers, &
-                         atype, moltype
+                         nequil, dt, layers, &
+                         atypeO, atypeH
   IMPLICIT NONE
   INTEGER                    :: i
   CHARACTER(100)             :: pos_file, vel_file, index_file
@@ -49,6 +49,7 @@ SUBROUTINE INITIALIZE
   OPEN(unit=1, file = index_file)
   READ(1,*) natoms, nframes, nequil
   READ(1,*) nwater, nlayers, dt
+  READ(1,*) atypeO, atypeH
   ALLOCATE(layers(nlayers+1))
   READ(1,*) layers
   CLOSE(1)
@@ -59,51 +60,12 @@ SUBROUTINE INITIALIZE
   ALLOCATE(oh_dist(3,2*nwater,nframes)); oh_dist = 0.d0
   ALLOCATE(oh_vel(3,2*nwater,nframes)); oh_vel = 0.d0
   ALLOCATE(autocorr(nlayers,nframes)); autocorr = 0
-  ALLOCATE(moltype(natoms))
   ALLOCATE(atype(natoms))
 
   OPEN(unit = 1,file = pos_file)
   OPEN(unit = 2,file = vel_file)
   
 END SUBROUTINE INITIALIZE
-
-SUBROUTINE OH_DISTRIBUTION (frame)
-  !Generate the OH distribution for each water in a specific frame
-  USE histogram,  ONLY : oh_dist, oh_vel
-  USE parameters, ONLY : natoms, vel, coarse, moltype
-  IMPLICIT NONE
-  INTEGER                    :: frame, i, ih
-  INTEGER                    :: ind_OH
-  INTEGER                    :: ind_layer
-  INTEGER                    :: ind_H(2)
-  LOGICAL                    :: is_oxygen
-  REAL*8                     :: oh(3,2)
-  LOGICAL                    :: is_water_oxygen
-
-  DO i = 1,natoms
-
-    !Calculate the OH vector:
-    IF ( is_water_oxygen(i) ) THEN
-
-      ind_H = 0
-      ind_OH = 2*(moltype(i)-2) !Assuming water indexes start from 2
-      CALL OH_VECT( i, oh, ind_H )
-   
-      !Max two OH vectors per O atom, taking PBC into account 
-      DO ih = 1,2
-
-        ind_OH = ind_OH + 1
-        oh_dist (:,ind_OH,frame) = oh(:,ih)  
-        oh_vel (:,ind_OH,frame) = vel(ind_H(ih),:) - vel(i,:) 
-        coarse(frame,ind_OH) = ind_layer(i)
-
-      END DO
-
-    END IF
-
-  ENDDO
- 
-END SUBROUTINE OH_DISTRIBUTION
 
 SUBROUTINE SSVAC 
   !Surface specific velocity-velocity correlation function
@@ -134,7 +96,6 @@ SUBROUTINE SSVAC
       DO iw = 1,2*nwater
 
         layer = coarse(frame2,iw)
-        IF (layer.eq.4) CYCLE
         counter_all(layer) = counter_all(layer) + 1
 
         !If the particle dont leave the window during the interval frame1
@@ -202,52 +163,31 @@ SUBROUTINE PRINT_RESULTS
 
 END SUBROUTINE PRINT_RESULTS
 
-SUBROUTINE OH_VECT(O, OH, ind_H)
-  ! Normalized vector from atom O to atom H
-  USE parameters, ONLY : natoms, box, pos, moltype
+SUBROUTINE OH_DISTRIBUTION (frame)
+  !Compute OH_distance and OH velocity for each H atom
+  USE histogram,  ONLY : oh_dist, oh_vel, oh_pos
+  USE parameters, ONLY : natoms, pos, vel, atypeO, layers
   IMPLICIT NONE
-  INTEGER, INTENT(IN)                  :: O
-  INTEGER                              :: ind_H(2)
-  REAL*8          , INTENT(INOUT)      :: OH(3,2)
-  REAL*8                               :: ohtmp(3)
-  INTEGER                              :: iat, ipol, ih
+  INTEGER                    :: frame, i, ih
+  INTEGER                    :: ind_OH, indO
+  REAL*8                     :: d_oh(3)
+  LOGICAL                    :: is_hydrogen
 
-  ih=0
- 
-  DO iat=1,natoms
- 
-    IF ( ( iat.ne.O ) .and. ( moltype(iat).eq.moltype(O) ) ) THEN
+  ind_OH=0
+  DO i = 1,natoms
+    IF ( is_hydrogen(i) ) THEN
 
-      DO ipol=1,3
-    
-        ohtmp(ipol) = pos(iat,ipol) - pos(O,ipol)
-        ohtmp(ipol) = ohtmp(ipol) - nint( ohtmp(ipol)/box(ipol) ) * box(ipol)
-    
-      END DO
-    
-      ih = ih + 1
-      OH(:,ih) = ohtmp / norm2(ohtmp)
-      ind_H(ih) = iat
- 
+      ind_OH = ind_OH + 1
+      CALL MINDISTANCE_VECTOR_IND( i, atypeO, d_oh, indO ) 
+      oh_dist (:,ind_OH,frame) = d_oh / norm2(d_oh) 
+      oh_vel (:,ind_OH,frame) = vel(:,i) - vel(:,indO) 
+      oh_pos (:,ind_OH,frame) = pos(:,indO) 
+
     END IF
 
-  END DO
-
-  IF ( ih.ne.2 ) THEN
-    PRINT *, 'Wrong number of OH bonds per water. STOP!!!', ih
-    STOP
-  END IF
-
-  IF ( ind_H(1) > ind_H(2) ) THEN
-    ohtmp=OH(:,2)
-    OH(:,2)=OH(:,1)
-    OH(:,1)=ohtmp
-    iat=ind_H(1)
-    ind_H(1)=ind_H(2)
-    ind_H(2)=iat
-  END IF
-
-END SUBROUTINE OH_VECT
+  ENDDO
+ 
+END SUBROUTINE OH_DISTRIBUTION
 
 INTEGER FUNCTION ind_layer( ind_O )
   !Layer index for prefactor. ind_O is the index of water oxygen in pos

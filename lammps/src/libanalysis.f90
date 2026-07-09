@@ -881,6 +881,30 @@ SUBROUTINE Vector_Distancei(a,b,d_out)
 
 END SUBROUTINE Vector_Distancei
 
+SUBROUTINE MINDISTANCE_VECTOR_IND( ind1, atype2, dmin, ind_min )
+  USE parameters, only: natoms, atype
+  IMPLICIT NONE
+  INTEGER, INTENT(IN)          :: ind1, atype2
+  INTEGER, INTENT(INOUT)       :: ind_min
+  REAL*8, INTENT(INOUT)        :: dmin(3)
+  INTEGER                      :: iat
+  REAL*8                       :: d(4), rmin
+
+  rmin = 100.
+
+  DO iat=1,natoms
+    IF( atype(iat)==atype2 ) then
+        CALL DISTANCE_VECTOR_IND( ind1, iat, d) 
+        if (d(4)<rmin) then
+            ind_min = iat
+            dmin = d(1:3)
+            rmin = d(4)
+        end if
+    END IF
+  END DO
+
+END SUBROUTINE MINDISTANCE_VECTOR_IND
+
 LOGICAL FUNCTION is_oxygen(ind)
   USE parameters, ONLY : atype, atypeO !ind_atom
   IMPLICIT NONE
