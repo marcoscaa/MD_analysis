@@ -1,5 +1,5 @@
 all:
 	cd ../src && make intel
-	ifort -I../src/ -O0 -qopenmp SFG.f90 -o sfg.x ../src/libanalysis.o
+	ifort -I../src/ -qopenmp SFG.f90 -o sfg.x ../src/libanalysis.o
 debug:
 	ifort -I../src/ -O0 -g -traceback -check all SFG.f90 -o sfg.x ../src/libanalysis.o
