@@ -56,7 +56,7 @@ SUBROUTINE INITIALIZE
 
   ALLOCATE(pos(3,natoms)) ! coordinates
   ALLOCATE(vel(3,natoms)) ! velocities 
-  ALLOCATE(coarse(nframes,2*nwater)); coarse=0
+  ALLOCATE(coarse(nframes,2*nwater)); coarse=1
   ALLOCATE(oh_dist(3,2*nwater,nframes)); oh_dist = 0.d0
   ALLOCATE(oh_vel(3,2*nwater,nframes)); oh_vel = 0.d0
   ALLOCATE(autocorr(nlayers,nframes)); autocorr = 0
