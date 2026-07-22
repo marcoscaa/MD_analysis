@@ -326,12 +326,6 @@ SUBROUTINE COARSE_GRAIN_POS (frame)
       coarse(frame,iwat) = ind_z
 
     END IF
-    !IF (atype(iat)==1) then
-    !  z = pos(3,iat) - box(3)/6.
-    !  !z = z - nint(z/box(3))*box(3)
-    !  !z = z - box(3)
-    !  print *, z
-    !END IF
 
   END DO
 

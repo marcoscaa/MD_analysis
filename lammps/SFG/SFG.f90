@@ -5,7 +5,6 @@ MODULE histogram
   REAL*8          , ALLOCATABLE            :: oh_dist(:,:,:)
   REAL*8          , ALLOCATABLE            :: oh_vel(:,:,:)
   REAL*8          , ALLOCATABLE            :: autocorr(:,:)
-  REAL*8          , ALLOCATABLE            :: layerspf(:)
 END MODULE histogram
 
 PROGRAM SFG
@@ -15,12 +14,13 @@ PROGRAM SFG
 
   CALL INITIALIZE
   CALL REMOVE_EQUIL
+  CALL REMOVE_EQUIL_VEL
 
   DO frame = 1,nframes
     CALL READ_ATOM_REDUCED
     CALL READ_VELOCITIES
-    CALL SET_CENTER_OF_MASS_TO_ZERO
-    CALL OH_DISTRIBUTION (frame)
+    CALL COARSE_GRAIN_POS(frame)
+    CALL OH_DISTRIBUTION(frame)
   END DO
 
   CALL SMOOTH_COARSE_GRAIN
