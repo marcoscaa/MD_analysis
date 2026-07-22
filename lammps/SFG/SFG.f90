@@ -36,7 +36,7 @@ SUBROUTINE INITIALIZE
   USE parameters, ONLY : natoms, nframes, nwater, &
                          pos, vel, coarse, nlayers, &
                          nequil, dt, layers, &
-                         atypeO, atypeH
+                         atypeO, atypeH, atype
   IMPLICIT NONE
   INTEGER                    :: i
   CHARACTER(100)             :: pos_file, vel_file, index_file
@@ -165,8 +165,8 @@ END SUBROUTINE PRINT_RESULTS
 
 SUBROUTINE OH_DISTRIBUTION (frame)
   !Compute OH_distance and OH velocity for each H atom
-  USE histogram,  ONLY : oh_dist, oh_vel, oh_pos
-  USE parameters, ONLY : natoms, pos, vel, atypeO, layers
+  USE histogram,  ONLY : oh_dist, oh_vel
+  USE parameters, ONLY : natoms, vel, atypeO, layers
   IMPLICIT NONE
   INTEGER                    :: frame, i, ih
   INTEGER                    :: ind_OH, indO
@@ -178,10 +178,9 @@ SUBROUTINE OH_DISTRIBUTION (frame)
     IF ( is_hydrogen(i) ) THEN
 
       ind_OH = ind_OH + 1
-      CALL MINDISTANCE_VECTOR_IND( i, atypeO, d_oh, indO ) 
-      oh_dist (:,ind_OH,frame) = d_oh / norm2(d_oh) 
-      oh_vel (:,ind_OH,frame) = vel(:,i) - vel(:,indO) 
-      oh_pos (:,ind_OH,frame) = pos(:,indO) 
+      CALL MINDISTANCE_VECTOR_IND( i, atypeO, d_oh, indO )
+      oh_dist (:,ind_OH,frame) = d_oh / norm2(d_oh)
+      oh_vel (:,ind_OH,frame) = vel(:,i) - vel(:,indO)
 
     END IF
 
